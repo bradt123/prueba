@@ -1,0 +1,45 @@
+                 select p.nombre,p.correo,u.cuenta,f.id_funcionario,m.fecha_dev_prestamo
+                        from segu.tpersona p
+                        inner join segu.tusuario u on u.id_persona = p.id_persona
+                        inner join orga.tfuncionario f on f.id_persona = p.id_persona
+                        inner join kaf.tmovimiento m on m.id_funcionario = f.id_funcionario
+                        where m.fecha_dev_prestamo is not null
+
+-----------------------------------------
+v_id_funcionario  i
+--------------------------------------
+		{
+			config:{
+				name: 'fecha',
+				fieldLabel: 'Fecha Solicitud',
+				allowBlank: false,
+				anchor: '80%',
+				gwidth: 90,
+				format: 'd/m/Y',
+				value : new Date(),
+				renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
+			},
+				type:'DateField',
+				filters:{pfiltro:'solefe.fecha',type:'date'},
+				id_grupo:1,
+				grid:true,
+				form:true
+		},
+		{
+			config:{
+				name: 'fecha_entrega',
+				fieldLabel: 'Fecha Entrega',
+				allowBlank: false,
+				anchor: '80%',
+				gwidth: 90,
+				format: 'd/m/Y',
+				value : new Date(),
+				renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
+			},
+				type:'DateField',
+				filters:{pfiltro:'solefe.fecha_entrega',type:'date'},
+				id_grupo:1,
+				grid:true,
+				form:false
+		},
+    ---------------------------------------
