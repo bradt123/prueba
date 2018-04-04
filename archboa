@@ -4,7 +4,8 @@
                         inner join orga.tfuncionario f on f.id_persona = p.id_persona
                         inner join kaf.tmovimiento m on m.id_funcionario = f.id_funcionario
                         where m.fecha_dev_prestamo is not null
-
+if m.fecha_dev_prestamo::date + 2 = now():date
+                        	raise exception 'local'
 -----------------------------------------
 v_id_funcionario  i
 --------------------------------------
