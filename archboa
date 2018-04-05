@@ -1,11 +1,25 @@
-                 select p.nombre,p.correo,u.cuenta,f.id_funcionario,m.fecha_dev_prestamo
+           select p.nombre,p.correo,u.cuenta,f.id_funcionario,m.fecha_dev_prestamo,m.fecha_mov
                         from segu.tpersona p
                         inner join segu.tusuario u on u.id_persona = p.id_persona
                         inner join orga.tfuncionario f on f.id_persona = p.id_persona
                         inner join kaf.tmovimiento m on m.id_funcionario = f.id_funcionario
                         where m.fecha_dev_prestamo is not null
-if m.fecha_dev_prestamo::date + 2 = now():date
-                        	raise exception 'local'
+                        
+                        create or replace function kaf.sms()
+                        returns varchar as 
+                   
+                        fecha = m.fecha_dev_prestamo - m.fecha_mov
+                         fecha = now() - m.fecha_dev_prestamo
+                        if (fecha = -2)then                                      
+                        	raise exception sms
+                         elsif (fecha = 0) then
+                        	raise 'sms-cumplido'                        
+                        	sms = 'sms'||dev
+                            raise exception sms
+                          
+                        end if
+                        
+                        language "plpgsql"
 -----------------------------------------
 v_id_funcionario  i
 --------------------------------------
