@@ -1,0 +1,32 @@
+					renderer: function(value, p, record) {
+						var da = new Date();
+						var d = da.toLocaleDateString();
+						var fe =record.data['fecha_dev_prestamo'];
+						
+						
+						//confirm(fe.toLocaleDateString());
+						if (fe == null) {
+							return String.format('<div><b><font color="black">{0}</font></b><br></div>', value);	
+						}						
+              			else{
+              				//var f = fe.dateFormat('d/m/Y');
+              				//var fecha = parseInt(d) - parseInt(f);
+              				//console.log(fe);
+              				function ca(f1,f2)
+        					{
+        						var tiempo = f1.getTime() - f2.getTime(); 
+               			 		var dias = Math.floor(tiempo / (1000 * 60 * 60 * 24));            
+                				return dias; 
+       					    }
+              				var fecha =ca(da,fe); 
+							if (fecha < 0) {                 
+  							return String.format('<div><b><font color="red">{0}</font></b><br></div>', value);
+  						
+              			  	}else {
+              			  	return String.format('<div><b><font color="green">{0}</font></b><br></div>', value);
+              			  }
+              				
+              			}
+              			
+              			
+				 }
