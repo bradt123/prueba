@@ -64,7 +64,7 @@ BEGIN
         END LOOP;
         v_cont = v_general;
         v_resp = v_cont::varchar;
-    ELSIF(p_transaccion = 'CONT_HERMANOS')THEN
+    /*ELSIF(p_transaccion = 'CONT_HERMANOS')THEN
 
         --v_nivel = kaf.f_get_arbol(p_id_clasificacion, 'NIVEL')::INTEGER; tipo record
           v_nivel = select c.nivel from kaf.vclasificacion_arbol c 
@@ -96,7 +96,7 @@ BEGIN
         FROM kaf.vclasificacion_arbol ar
         WHERE ar.id_clasificacion = p_id_clasificacion;
         v_cont = v_nivel;
-        v_resp = v_cont::varchar;
+        v_resp = v_cont::varchar;*/
     ELSIF(p_transaccion = 'IDS_HIJOS')THEN
         IF(kaf.f_get_arbol(p_id_clasificacion, 'CONT_HIJOS') = '0')THEN
               v_cont =  p_id_clasificacion;
