@@ -15,3 +15,20 @@ inner join kaf.tactivo_fijo ac on ac.id_clasificacion = a.id_clasificacion
 where a.id_clasificacion_fk =1723 and ac.codigo like '03.01.01.%'
 (select kaf.f_get_codigo_clasificacion_rec(1896))
                
+--------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION for_loop_through_query(
+   n INTEGER DEFAULT 10
+) 
+RETURNS VOID AS $$
+DECLARE
+    rec RECORD;
+BEGIN
+    FOR rec IN SELECT title 
+        FROM film 
+        ORDER BY title
+        LIMIT n 
+    LOOP 
+ RAISE NOTICE '%', rec.title;
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
