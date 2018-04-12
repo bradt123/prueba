@@ -1,9 +1,3 @@
-CREATE OR REPLACE FUNCTION kaf.f_get_cantidad_hijos (
-  p_id_clasificacion integer,
-  p_transaccion varchar
-)
-RETURNS varchar AS
-$body$
 DECLARE
 
   v_nombre_funcion        text;
@@ -13,6 +7,7 @@ DECLARE
   v_record_ids      record;
   v_arra            integer[];
   
+  v_contador_g	 integer=0;
   v_contador 	integer=0; 
   v_record	record;
   v_index INTEGER;
@@ -39,8 +34,9 @@ BEGIN
              into v_contador
             FROM  kaf.tactivo_fijo ac 
             where ac.id_clasificacion = v_record.id_clasificacion;
-		    --raise notice 'hijos: %, %', v_record_ids.id_clasificacion,v_record_ids.codigo;
+		    v_contador_g = v_contador_g + v_contador; 
     end loop;
+    v_contador = v_contador_g;
     
   
   ELSIF(p_transaccion = 'IDS_HIJOS')THEN
@@ -83,9 +79,3 @@ BEGIN
     RETURN v_contador::varchar;
 
 END;
-$body$
-LANGUAGE 'plpgsql'
-VOLATILE
-CALLED ON NULL INPUT
-SECURITY INVOKER
-COST 100;
