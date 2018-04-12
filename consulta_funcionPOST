@@ -1,0 +1,13 @@
+select
+                            claf.id_clasificacion,
+                            claf.id_clasificacion_fk,
+                            claf.clasificacion,
+                            claf.nivel,
+                            cla.tipo_activo,
+                            cla.depreciable,
+                            cla.vida_util,
+                            case when claf.nivel = 2 then kaf.f_get_cantidad_hijos(claf.id_clasificacion,'CONT_NIETOS') 
+                                 when claf.nivel = 3 then kaf.f_get_cantidad_hijos(claf.id_clasificacion,'CONT_HIJOS') end as hijos
+                        from kaf.vclasificacion_arbol claf
+                        inner join kaf.tclasificacion cla
+                        on cla.id_clasificacion = claf.id_clasificacion
