@@ -1,0 +1,132 @@
+CREATE OR REPLACE FUNCTION kaf.f_get_arbol (
+  p_id_clasificacion integer,
+  --p_id_clasificacion_fk varchar
+)
+RETURNS varchar AS
+$body$
+/**************************************************************************
+ SISTEMA:   Sistema kafsupuestos
+ FUNCION:     kaf.f_get_arbol
+ DESCRIPCION:   Funcion que recupera los hijos o nietos de un arbol.
+ AUTOR:      (FEA)
+ FECHA:         28-07-2017 15:15:26
+ COMENTARIOS:
+***************************************************************************
+ HISTORIAL DE MODIFICACIONES:
+
+ DESCRIPCION:
+ AUTOR:
+ FECHA:
+***************************************************************************/
+
+DECLARE
+
+  v_resp                varchar='';
+  v_nombre_funcion        text;
+  v_record        record;
+  v_cont          integer=1;
+  v_general       integer=0;
+  v_nivel         integer;
+  v_id_gestion      integer;
+  v_fkey          integer;
+
+  v_record_ids      record;
+  v_cadena_ids      varchar ='';
+BEGIN
+
+    v_nombre_funcion = 'kaf.f_get_arbol';
+
+    /*********************************
+  #TRANSACCION:  'DETALLE DEL ARBOL DE OBJETIVOS'
+  #DESCRIPCION: Devuelve el numero de hijos, nietos, hermanos.
+  #AUTOR:   franklin.espinoza
+  #FECHA:   13-7-2017 13:21:12
+  ***********************************/
+  /*SELECT g.id_gestion
+    INTO v_id_gestion
+    FROM param.tgestion g
+    WHERE g.gestion = EXTRACT(YEAR FROM current_date);*/
+
+  IF(p_transaccion = 'CONT_HIJOS')THEN
+
+       SELECT count(cla.id_clasificacion)
+       INTO v_cont
+       FROM kaf.tclasificacion cla
+       inner join kaf.tactivo_fijo ac on ac.id_clasificacion = p_id_clasificacion
+       WHERE ac.id_clasificacion = p_id_clasificacion;
+       v_resp = v_cont::varchar;
+    ELSIF(p_transaccion = 'CONT_NIETOS')THEN
+      FOR v_cont IN (SELECT kaf.f_get_arbol(cla.id_clasificacion, 'CONT_HIJOS')
+                 FROM kaf.tclasificacion cla
+                 inner join kaf.tactivo_fijo ac on ac.id_clasificacion = p_id_clasificacion
+       WHERE ac.p_id_clasificacion = p_id_clasificacion)LOOP
+          v_general = v_general + v_cont;
+        END LOOP;
+        v_cont = v_general;
+        v_resp = v_cont::varchar;
+    ELSIF(p_transaccion = 'CONT_HERMANOS')THEN
+
+        --v_nivel = kaf.f_get_arbol(p_id_clasificacion, 'NIVEL')::INTEGER; tipo record
+          v_nivel = select c.nivel from kaf.vclasificacion_arbol c 
+
+          IF(v_nivel = 1)THEN
+              SELECT count(cla.id_clasificacion)
+              INTO v_cont
+              FROM kaf.tclasificacion cla
+              inner join kaf.vclasificacion_arbol ar on ar.id_clasificacion = cla.id_clasificacion
+              WHERE ar.nivel = v_nivel 
+          IF(v_nivel = 2)THEN
+              SELECT count(cla.id_clasificacion)
+              INTO v_cont
+              FROM kaf.tclasificacion cla
+              inner join kaf.vclasificacion_arbol ar on ar.id_clasificacion = cla.id_clasificacion
+              WHERE ar.nivel = v_nivel 
+          ELSE
+              SELECT cla.id_clasificacion_fk
+              INTO v_fkey
+              FROM kaf.tclasificacion cla
+              WHERE cla.id_clasificacion = p_id_clasificacion;
+
+              v_cont =  kaf.f_get_arbol(v_fkey, 'CONT_HIJOS')::integer;
+          END IF;
+          v_resp = v_cont::varchar;
+    ELSIF(p_transaccion = 'NIVEL')THEN
+      SELECT ar.nivel
+        INTO v_nivel
+        FROM kaf.vclasificacion_arbol ar
+        WHERE ar.id_clasificacion = p_id_clasificacion;
+        v_cont = v_nivel;
+        v_resp = v_cont::varchar;
+    ELSIF(p_transaccion = 'IDS_HIJOS')THEN
+        IF(kaf.f_get_arbol(p_id_clasificacion, 'CONT_HIJOS') = '0')THEN
+              v_cont =  p_id_clasificacion;
+      END IF;
+      FOR v_record_ids IN (SELECT cla.id_clasificacion
+                  FROM kaf.tclasificacion cla
+                  WHERE cla.id_clasificacion = p_id_clasificacion)LOOP
+
+          RAISE NOTICE 'id_clasificacion: %',v_record_ids.id_clasificacion;
+            v_resp = v_resp || v_record_ids.id_clasificacion||','|| kaf.f_get_arbol(v_record_ids.id_clasificacion, 'IDS_HIJOS');
+        END LOOP;
+    END IF;
+
+  --v_resp = v_cont::varchar;
+
+    RETURN v_resp;
+
+EXCEPTION
+
+  WHEN OTHERS THEN
+    v_resp='';
+    v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
+    v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
+    v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
+    raise exception '%',v_resp;
+
+END;
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
+COST 100;
