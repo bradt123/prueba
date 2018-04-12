@@ -1,0 +1,91 @@
+CREATE OR REPLACE FUNCTION kaf.f_get_cantidad_hijos (
+  p_id_clasificacion integer,
+  p_transaccion varchar
+)
+RETURNS varchar AS
+$body$
+DECLARE
+
+  v_nombre_funcion        text;
+  v_resp              varchar='';
+  v_re              integer[];
+  v_cont          integer[];
+  v_record_ids      record;
+  v_arra            integer[];
+  
+  v_contador 	integer=0; 
+  v_record	record;
+  v_index INTEGER;
+BEGIN
+
+    v_nombre_funcion = 'kaf.f_get_cantidad_hijos';
+
+  IF(p_transaccion='CONT_HIJOS')THEN
+    for v_record in SELECT cla.id_clasificacion,cla.codigo
+    				FROM kaf.tclasificacion cla
+       		        WHERE cla.id_clasificacion = p_id_clasificacion
+                    LOOP
+  			SELECT count(ac.id_clasificacion) as contador
+            into v_contador
+            FROM  kaf.tactivo_fijo ac 
+            where ac.id_clasificacion = v_record.id_clasificacion;
+    end loop;       
+  ELSIF(p_transaccion='CONT_NIETOS')THEN
+  	for v_record in SELECT cla.id_clasificacion,cla.codigo
+                    from kaf.tclasificacion cla 
+                    where cla.id_clasificacion_fk = p_id_clasificacion
+				    LOOP
+            SELECT count(ac.id_clasificacion) as contador
+             into v_contador
+            FROM  kaf.tactivo_fijo ac 
+            where ac.id_clasificacion = v_record.id_clasificacion;
+		    --raise notice 'hijos: %, %', v_record_ids.id_clasificacion,v_record_ids.codigo;
+    end loop;
+    
+  
+  ELSIF(p_transaccion = 'IDS_HIJOS')THEN
+  
+        /*IF(kaf.kaf.f_get_cantidad_hijos(p_id_clasificacion, 'CONT_HIJOS') = '0')THEN
+              v_cont =  p_id_clasificacion;
+      END IF;*/
+      
+	END IF;
+  
+
+
+    /*FOR v_index IN 
+                  select claf.id_clasificacion_fk
+                  from kaf.vclasificacion_arbol claf
+                  inner join kaf.tclasificacion cla on cla.id_clasificacion = claf.id_clasificacion
+                  where claf.id_clasificacion = p_id_clasificacion
+                  order by claf.clasificacion LOOP
+                  raise notice 'id_clasificacion:%',v_index;*/
+                  
+       /* 
+        select claf.id_clasificacion_fk
+        
+        from kaf.vclasificacion_arbol claf
+        inner join kaf.tclasificacion cla on cla.id_clasificacion = claf.id_clasificacion
+        where claf.id_clasificacion_fk = v_index.id_clasificacion
+        order by claf.clasificacion */
+          
+     /* v_arra = v_index.id_clasificacion;
+      
+      v_re =(select count(*)
+        from kaf.tclasificacion c
+        inner join kaf.vclaificacion_raiz a on a.id_clasificacion = c.id_clasificacion
+        inner join kaf.tactivo_fijo ac on ac.id_clasificacion = a.id_clasificacion
+        where ac.codigo like 
+        (select kaf.f_get_codigo_clasificacion_rec(v_arra.id_clasificacion))::varchar||'.%')*/
+      --END LOOP;
+   
+
+    RETURN v_contador::varchar;
+
+END;
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
+COST 100;
