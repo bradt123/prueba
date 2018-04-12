@@ -1,0 +1,17 @@
+
+ SELECT cla.codigo_completo_tmp--,cla.codigo
+       FROM kaf.tclasificacion cla             
+ where cla.id_clasificacion =1723 
+ union all 
+ SELECT cla.codigo_completo_tmp--, cla.codigo
+       FROM kaf.tclasificacion cla                 
+		where cla.id_clasificacion_fk= 1723
+union all
+
+select ac.codigo
+from kaf.tclasificacion c
+inner join kaf.vclaificacion_raiz a on a.id_clasificacion = c.id_clasificacion
+inner join kaf.tactivo_fijo ac on ac.id_clasificacion = a.id_clasificacion
+where a.id_clasificacion_fk =1723 and ac.codigo like '03.01.01.%'
+(select kaf.f_get_codigo_clasificacion_rec(1896))
+               
