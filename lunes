@@ -219,3 +219,28 @@ Class RPlanesPago extends Report {
     }      
 }
 ?>
+================
+		$maxLength=80;
+		$maxLengthLinea=70;
+		$x=75;
+		$y=38;
+		$codAux = substr($this->cod['desc'],0,$maxLength);
+		if(strlen($this->cod['desc']) > $maxLength){
+
+			$codAux = substr($this->cod['desc'],0,$maxLength-23).'...';
+			//$this->SetFont('','',20);
+		}
+		while (strlen($codAux)>0) {
+
+			$tmp = substr($codAux, 0, $maxLengthLinea);
+			$text =mb_strtoupper($tmp,'UTF-8');
+			$this->Multicell(0,0, $text, 0,'J', false, 0, $x, $y,true,0, false,true,0, '', true);
+			//$this->MultiCell(0, 0, $text, 0,'L', false,0, $x, $y,true, 0, false,true, 'J',true);
+			
+			//$this->writeHTMLCell(0, 0, $x, $y, $html, 0, 1, 0, false, 'J',true);
+			//$this->Text($x, $y, $text, false, false, true, 0, 5,'',false,'',3,false,'','',true);
+			//$this->Text($x, $y, strtoupper($tmp), false, false, true, 0, 5,'',false,'',3,false,'','',true);
+			$codAux = substr($codAux, $maxLengthLinea,$maxLength);
+			$y=$y+7;
+
+		}
